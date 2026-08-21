@@ -1,0 +1,15 @@
+inherit_from: config/config_gaussian_4d.yaml
+
+Training:
+  deform_cfg:
+    # Weight the temporal conditional per observation instead of per Gaussian
+    # (section 3.49). A bank is one instant's worth of seeded surface, and how
+    # many rows it holds is an artefact of seeding and pruning: a finished map
+    # carries banks from 211 to 2241 rows. Weighting rows independently lets the
+    # same kernel value mean ten times more for one bank than another, which is
+    # not what conditioning a 4D primitive on a time is supposed to express.
+    #
+    # time_scale_init deliberately stays at 0.5, the value the ablation in
+    # config_gaussian_4d_ts025.yaml varied: the two are alternative accounts of
+    # the same failure and must not move together, or neither is testable.
+    per_observation_weights: true

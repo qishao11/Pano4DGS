@@ -1,0 +1,16 @@
+inherit_from: config/config_gaussian_4d.yaml
+
+Training:
+  deform_cfg:
+    # Seed the moving object from the depth prior rather than from bundle
+    # adjustment's disparity. Section 3.52 located the placement error there:
+    # 86.5% of dynamic Gaussians land inside the object's silhouette and only
+    # 21.7% at the right distance along the ray, because BA updates a dynamic
+    # pixel's disparity from a multi-view constraint that the object's own
+    # motion has already invalidated. Back-projecting the same pixels with the
+    # prior instead lands 100.0% of them on the sphere at every keyframe, which
+    # is what this run tests end to end.
+    #
+    # Everything else is inherited unchanged, so this is a one-variable
+    # comparison against output/pano4d.
+    dynamic_depth_from_prior: true

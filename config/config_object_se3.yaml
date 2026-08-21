@@ -1,0 +1,25 @@
+inherit_from: config/config_rampfix.yaml
+
+Training:
+  # Object-level SE(3) representation (panoramic_4dgs_status.md section 3.29).
+  # Same oracle dynamic labelling and same seeded rows as
+  # config_oracle_time_slice.yaml -- the difference is what happens at render
+  # time: instead of showing only the bank belonging to the rendered timestamp,
+  # the nearest bank is *carried* to that timestamp by the object's SE(3)
+  # trajectory. At observed times that transform is the identity, so this is
+  # expected to reproduce the time-slice numbers; unlike it, this path is also
+  # defined between observations, which is the point.
+  dynamic_mode: object_se3
+  deform: false
+  deform_cfg:
+    oracle_dynamic_colors:
+      - [240, 220, 60]
+      - [220, 40, 40]
+      - [40, 220, 220]
+    oracle_color_threshold: 0.1
+    # Must stay false: it selects the time-slice mode, and resolve_dynamic_mode
+    # rejects a config that asks for two dynamic modes at once. The dynamic rows
+    # themselves still exist -- they come from the oracle colors above.
+    oracle_time_sliced_dynamic: false
+    oracle_time_tolerance: 0.0001
+    oracle_dynamic_downsample: 8

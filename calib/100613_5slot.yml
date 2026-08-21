@@ -1,0 +1,28 @@
+intrinsic:  [
+    [2044.5083584358413, 2044.5083584358413, 949.5746451352071, 633.2422462156501, 0.040358363932006036, -0.33001662226602974, 0.0010402702690110032, -0.0015669020781401406],  # front
+    [2044.5083584358413, 2044.5083584358413, 949.5746451352071, 633.2422462156501, 0.040358363932006036, -0.33001662226602974, 0.0010402702690110032, -0.0015669020781401406],  # front (dup, mimics cubemap's stereo-placeholder slot)
+    [2045.6832826227512, 2045.6832826227512, 960.0856653382356, 646.2227371650151, 0.033290883138275176, -0.29599929802405006, 0.0016776228215584818, -0.0015923673698739012],  # front_right
+    [2056.3902134214923, 2056.3902134214923, 954.4196030939092, 645.9931938280515, 0.03308693956285257, -0.33009329556765854, 0.003240251750927568, 0.0013151606060510855],  # front_left
+    [2045.6832826227512, 2045.6832826227512, 960.0856653382356, 646.2227371650151, 0.033290883138275176, -0.29599929802405006, 0.0016776228215584818, -0.0015923673698739012],  # front_right (dup, reaches 5 slots to match cubemap n_slots=5 without needing a 4th distinct camera)
+]
+
+camera:     'pinhole'
+
+baseline:   [-1.000482, 0, -0.462101, 0, -0.385045, 0, 0.922846]
+
+# NOTE on the pairing convention (verified 2026-08-10, see paper_experiment_list.md
+# "槽位约定核实"): slot 1 is DROID's stereo-right placeholder and is dropped by
+# motion_filter (`del indices[1]`), so N image dirs give N-1 *mapping* cameras and
+# T_cami_cam0[i] pairs with mapping camera i, NOT with slot i. With the 5 dirs
+# [front, front, front_right, front_left, front_right] the mapping cameras are
+# [front, front_right, front_left, front_right], so the rows below must be
+# [identity, T_front_right, T_front_left, T_front_right].
+# The previous version had identity in row 1, which placed front_right at exactly
+# front's pose -- that would have invalidated this control experiment regardless of
+# the resource-contention kill documented in panoramic_4dgs_status.md section 3.3.
+T_cami_cam0:  [[0, 0, 0, 0, 0, 0, 1],
+               [-1.000482, 0, -0.462101, 0, -0.385045, 0, 0.922846],
+               [0.984910, 0, -0.425039, 0, 0.377589, 0, 0.925938],
+               [-1.000482, 0, -0.462101, 0, -0.385045, 0, 0.922846]]
+
+timescale:    1

@@ -1,0 +1,10 @@
+inherit_from: config/config_gaussian_4d.yaml
+
+Training:
+  deform_cfg:
+    # Section 3.39: bank point count correlates with geometric tightness
+    # (rank -0.51; banks over 1000 points are 2.1x tighter). Section 3.24 tested
+    # 1/8 vs 1/4 and could not tell them apart, but that was the slow sequence
+    # scored by PSNR; the fast sequence plus the direction-cosine metric is far
+    # more sensitive. Lower value = denser (it is the reciprocal kept).
+    oracle_dynamic_downsample: 4

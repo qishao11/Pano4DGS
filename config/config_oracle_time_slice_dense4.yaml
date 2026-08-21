@@ -1,0 +1,10 @@
+inherit_from: config/config_oracle_time_slice.yaml
+
+Training:
+  deform_cfg:
+    # Try denser dynamic sampling (1/8 -> 1/4) to test whether the
+    # under-populated small-sphere frames noted in section 3.19 are a real
+    # bottleneck for the dynamic-ROI margin, or whether the noise floor
+    # (see section 3.24, +-1dB across identical reruns) simply swamps any
+    # gain. Static sampling left at 1/64 to isolate this one variable.
+    oracle_dynamic_downsample: 4

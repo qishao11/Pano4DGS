@@ -1,0 +1,29 @@
+inherit_from: config/config_rampfix.yaml
+
+Training:
+  deform_cfg:
+    # Diagnostic oracle for tools/make_synthetic_erp_room.py --dynamic_object.
+    # The generator defines these colors in BGR, but MotionFilter stores frames
+    # in RGB order before Gaussian seeding. Static synthetic ERP frames have zero
+    # hits at this threshold; this is not a production segmenter.
+    oracle_dynamic_colors:
+      - [240, 220, 60]
+      - [220, 40, 40]
+      - [40, 220, 220]
+    oracle_color_threshold: 0.02
+    # The synthetic object is a rigid translating sphere.  This removes the
+    # scale/rotation shortcut after ROI=5 was observed to inflate a front-view
+    # sphere into a large blur instead of learning its trajectory.
+    oracle_translation_only: true
+    # ROI=5 also inflated the canonical _scaling (max sphere-colored scale
+    # roughly 5.6 even with dscale=0). Keep the point-cloud initialized scale
+    # fixed for oracle-dynamic rows so the diagnostic must solve motion by xyz.
+    oracle_freeze_dynamic_scaling: true
+    # Diagnostic only: the moving sphere covers roughly 2% of the ERP, so a
+    # full-frame mean almost entirely optimizes the static room.  This auxiliary
+    # ROI L1 tests whether the gated deformation can learn motion when the known
+    # dynamic region receives meaningful gradient weight.
+    # gs_backend routes this auxiliary term only to DeformNet; canonical Gaussian
+    # parameters still receive the ordinary full-frame losses, preventing ROI
+    # supervision from repainting/inflating the map to cheat the diagnostic.
+    oracle_roi_weight: 5.0

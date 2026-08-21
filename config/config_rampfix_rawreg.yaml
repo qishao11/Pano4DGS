@@ -1,0 +1,80 @@
+Dataset:
+  pcd_downsample: 64
+  pcd_downsample_init: 32
+  adaptive_pointsize: True
+  point_size: 0.05
+  scale_multiplier: 2.0
+  scale_factor: 1
+
+Tracking:
+  motion_filter:
+    thresh: 2.4    # how much motion before considering new keyframe")
+    skip_blur: False
+  frontend:
+    keyframe_thresh: 4.0  # threshold to create a new keyframe")
+    frontend_thresh: 16.0 # add edges between frames whithin this distance")
+    frontend_window: 25   # frontend optimization window")
+    frontend_radius: 2    # force edges between frames within radius")
+    frontend_nms: 1       # non-maximal supression of edges")
+    mono_depth_alpha: 0.001
+  backend:
+    backend_thresh: 22.0  # add loop closure edges within this distance (larger is more edges)')
+    backend_radius: 2     # connect neighbors within radius (larger is more edges)')
+    backend_nms: 3        # non-maximal supression of edges (smaller is more edges)')
+    covis_thresh: 0.2
+  pgba:
+    active: False
+    pgba_thresh: 22.0     # add loop closure edges within this distance (larger is more edges)')
+
+Training:
+  init_itr_num: 1050
+  init_gaussian_update: 100
+  init_gaussian_reset: 500
+  init_gaussian_th: 0.005
+  init_gaussian_extent: 30
+  gaussian_update_every: 150
+  gaussian_update_offset: 50
+  gaussian_th: 0.7
+  gaussian_extent: 1.0
+  gaussian_reset: 1001
+  size_threshold: 20
+  window_size: 10
+  rgb_boundary_threshold: 0.01
+  lambda_dnormal: 0.1
+  compensate_exposure: false
+  deform: false          # 4DGS: enable time-conditioned Gaussian deformation field (or pass --deform)
+  deform_cfg:
+    xyz_freqs: 6
+    t_freqs: 4
+    hidden_dim: 128
+    n_layers: 3
+    t_scale: 1.0          # divides raw timestamps before Fourier encoding; tune to the sequence's time unit
+    lr: 0.001
+    reg_weight: 0.1       # L1 penalty on (dxyz, drot, dscale): pulls deformation to 0 unless the photometric loss needs it
+    max_dxyz: 1.0         # hard cap (world units) on |dxyz|, via tanh -- see deform_net.py docstring
+    max_daxis_angle: 1.0  # hard cap (radians) on |daxis_angle| before it becomes a quaternion delta
+    max_dscale: 2.0        # hard cap on |dscale_log| (log-space) -- e.g. 2.0 allows up to ~7.4x size change
+    ramp_iters: 15000       # same as config_rampfix.yaml (section 3.18's confirmed-working fix) -- kept
+                           # identical so this run isolates the one new variable below.
+    raw_reg_weight: 0.1     # DEBUG (config_rampfix_rawreg.yaml, panoramic_4dgs_status.md section 3.19):
+                           # section 3.15 tested raw_reg_weight in isolation (ramp_iters still stuck at the
+                           # broken default of 1000 at the time) and found 0.1 was the best of the three
+                           # values tried (13.97), though still short of ramp-only's 14.16. Never tested
+                           # together with the section 3.18 ramp_iters/iteration_count fix (15.20 alone).
+                           # Since raw_reg_weight directly penalizes the pre-tanh `raw` value itself (unlike
+                           # ramp, which only scales what reaches tanh), this tests whether it can suppress
+                           # the still-saturated dxyz_max tail that section 3.18 observed even with a working
+                           # extended ramp.
+
+opt_params:
+  pose_lr: 0.0001
+  position_lr_init: 0.00016
+  position_lr_final: 0.0000016
+  position_lr_max_steps: 30000
+  feature_lr: 0.0025
+  opacity_lr: 0.05
+  scaling_lr: 0.001
+  rotation_lr: 0.001
+  percent_dense: 0.01
+  lambda_dssim: 0.2
+  densify_grad_threshold: 0.0002

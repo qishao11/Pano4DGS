@@ -1,0 +1,24 @@
+inherit_from: config/config_rampfix.yaml
+
+Training:
+  # Oracle upper bound for the synthetic moving-sphere sequence. Dynamic
+  # Gaussians are assigned to their source physical timestamp and are visible
+  # only when that timestamp is rendered. Static Gaussians remain persistent.
+  # This deliberately disables DeformNet/ROI supervision: it isolates whether
+  # explicit temporal ownership fixes the clean experiment before we implement
+  # an object-level SE(3) model that can interpolate to unseen times.
+  deform: false
+  deform_cfg:
+    oracle_dynamic_colors:
+      - [240, 220, 60]
+      - [220, 40, 40]
+      - [40, 220, 220]
+    # Wider than the earlier 0.02 gate to include cubemap interpolation at the
+    # sphere boundary. The static synthetic sequence has no palette hits at 0.1.
+    oracle_color_threshold: 0.1
+    oracle_time_sliced_dynamic: true
+    oracle_time_tolerance: 0.0001
+    # Each dynamic bank exists at only one physical time, so the ordinary 1/64
+    # point-cloud sampling leaves small-sphere frames severely under-populated.
+    # Preserve dynamic pixels at 1/8 while keeping static pixels at 1/64.
+    oracle_dynamic_downsample: 8

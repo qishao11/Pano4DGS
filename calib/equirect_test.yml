@@ -1,0 +1,15 @@
+camera:      'equirect'
+
+# cubemap faces to generate per ERP frame. Must start with 'front' (drives DROID
+# tracking); the remaining faces are carried along as rig-BA cameras with a known,
+# fixed, zero-baseline rotation relative to 'front' (see mcgs_slam/cubemap.py).
+# P1 intentionally skips 'up'/'down' to avoid the equirectangular pole-singularity
+# risk noted in panoramic_support_feasibility.md (section 2.2).
+faces:       ['front', 'right', 'back', 'left']
+
+face_size:   384
+fov:         90
+
+baseline:    [0, 0, 0, 0, 0, 0, 1]
+
+timescale:   1

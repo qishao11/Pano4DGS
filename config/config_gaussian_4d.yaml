@@ -1,0 +1,59 @@
+inherit_from: config/config_rampfix.yaml
+
+Training:
+  # Native 4D Gaussians (panoramic_4dgs_status.md section 3.30 / gaussian_4d.py).
+  # Same oracle dynamic labelling and the same seeded rows as
+  # config_oracle_time_slice.yaml. The difference is at render time: instead of
+  # showing only the bank whose timestamp is being rendered, every dynamic row
+  # is a 4D primitive sliced at that instant -- it fades with distance in time
+  # and drifts by its own velocity. With time_scale_init -> 0 this reduces to
+  # the per-timestamp bank exactly.
+  dynamic_mode: gaussian_4d
+  deform: false
+  deform_cfg:
+    oracle_dynamic_colors:
+      - [240, 220, 60]
+      - [220, 40, 40]
+      - [40, 220, 220]
+    oracle_color_threshold: 0.1
+    # Must stay false: it selects the time-slice mode, and resolve_dynamic_mode
+    # rejects a config asking for two dynamic modes at once. The dynamic rows
+    # themselves still come from the oracle colors above.
+    oracle_time_sliced_dynamic: false
+    oracle_time_tolerance: 0.0001
+    oracle_dynamic_downsample: 8
+    # Temporal radius each dynamic row starts with, and the radius used at any
+    # time a camera actually observed. A quarter of the median gap, so a
+    # neighbouring bank contributes exp(-8) = 3e-4 and cannot make this frame's
+    # own rows a redundant explanation of it. At 0.5 it contributed 0.135, and
+    # sections 3.49/3.49.1 traced the t=1 collapse to exactly that: the loss dims
+    # the redundant rows (median opacity 0.722 -> 0.137 -> 0.063 across
+    # consecutive banks, against a flat 1.000 here) until pruning removes them.
+    time_scale_init: 0.25
+    # Radius used *only* at times nobody observed, where the opposite is needed:
+    # a midpoint is half a step from both banks and gets 0.135 at 0.25 but 0.607
+    # at 0.5. Splitting the two roles is what neither earlier fix did -- lowering
+    # the single radius bought clean observed frames with faint interpolated
+    # ones, and renormalizing the weights left the banks already dimmed (3.49.1).
+    interp_time_scale: 0.5
+    # Measure the bank-to-bank shift with the plain centroid difference rather
+    # than ICP. Section 3.47: ICP was introduced (3.36) to survive the outlier
+    # contamination of 3.29, and ground-truth depth removed that contamination
+    # (13/13 banks clean), after which the centroid wins in all six runs
+    # measured -- 0.884 vs 0.906 on four faces, 0.962 vs 0.975 on six. This
+    # config is the ground-truth-depth production path (3.43 requires --rgbd on
+    # synthetic data), so it takes the estimator that matches its own banks.
+    velocity_estimator: centroid
+
+opt_params:
+  # Both zero on purpose: sections 3.32-3.35 established that the photometric
+  # loss cannot learn object motion in this architecture -- a carried row is
+  # either redundant (and gets pushed away, learning a reversed velocity) or
+  # absent (and the hole is cheaper to fill another way). The learned velocity
+  # scored worse than no velocity at all, and the learned time_scale was harmful
+  # on its own too. Velocity now comes from bank registration instead
+  # (gs_backend.estimate_object_motion), which measured 3.3x better direction
+  # accuracy. The parameters stay in the optimizer so the plumbing and the
+  # checkpoint format are unchanged; they simply do not move.
+  velocity_lr: 0.0
+  time_scale_lr: 0.0

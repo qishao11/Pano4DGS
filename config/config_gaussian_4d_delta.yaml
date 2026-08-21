@@ -1,0 +1,9 @@
+inherit_from: config/config_gaussian_4d.yaml
+
+Training:
+  deform_cfg:
+    # Degenerate on purpose: a temporal radius this small makes the weight a
+    # delta, so gaussian_4d must reproduce the per-timestamp bank. This is the
+    # step-3 checkpoint -- the property is unit-tested in test_gaussian_4d.py,
+    # and this config verifies it holds in the real pipeline too.
+    time_scale_init: 0.000001

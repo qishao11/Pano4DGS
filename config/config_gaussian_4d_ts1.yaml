@@ -1,0 +1,10 @@
+inherit_from: config/config_gaussian_4d.yaml
+
+Training:
+  deform_cfg:
+    # Section 3.34: with time_scale 0.5 and a median observation gap of 1, a
+    # neighbouring bank contributes weight exp(-0.5*(1/0.5)^2) = 0.135, so the
+    # rows whose velocity is being learned account for ~13% of the loss. At 1.0
+    # that becomes 0.61 -- 4.5x the gradient signal. The target is the cosine
+    # against true motion crossing 0.5, below which moving is worse than not.
+    time_scale_init: 1.0

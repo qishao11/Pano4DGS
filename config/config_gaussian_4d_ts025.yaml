@@ -1,0 +1,17 @@
+inherit_from: config/config_gaussian_4d.yaml
+
+Training:
+  deform_cfg:
+    # Halve the temporal radius, to test the section 3.49 diagnosis of the t=1
+    # collapse. At 0.5 a bank one step away still contributes exp(-0.5*(1/0.5)^2)
+    # = 0.135 of its opacity, and where a bank is anomalously thin (t=1 kept only
+    # 211 rows against its neighbours' ~1050) that carry-over outweighs the
+    # frame's own object -- ghost/own = 1.39 -- and the frame renders as haze.
+    # At 0.25 the same neighbour contributes exp(-8) = 3e-4, i.e. nothing.
+    #
+    # This is a diagnostic, not a proposed default: the same radius also decides
+    # how present the object is at unobserved times (a midpoint sits 0.5 away,
+    # so it drops from weight 1.0 to 0.135). If the diagnosis is right this run
+    # should fix t=1 *and* visibly weaken the interpolated panoramas -- the two
+    # effects are the same knob.
+    time_scale_init: 0.25

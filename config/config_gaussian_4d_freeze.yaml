@@ -1,0 +1,11 @@
+inherit_from: config/config_gaussian_4d_priordepth.yaml
+
+Training:
+  deform_cfg:
+    # Hold the object's Gaussians at their seeded position through refinement.
+    # Section 3.53 showed seeding is exact (100.0% on the sphere) while the
+    # finished map keeps only 44.8%, with the in-silhouette fraction unchanged --
+    # the rows slide along the view ray, which a single supervising view has no
+    # gradient to prevent. Everything else is inherited from the prior-depth
+    # config, so this is a one-variable comparison against output/pano4d_priordepth.
+    freeze_dynamic_positions: true

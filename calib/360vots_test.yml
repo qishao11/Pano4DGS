@@ -1,0 +1,14 @@
+camera:      'equirect'
+
+# 360VOTS test/001 real photographic ERP source (3840x1920, static tripod rig,
+# see panoramic_4dgs_status.md section 3.21). face_size chosen conservatively
+# below cubemap.min_erp_width_for_face()'s requirement for this source width,
+# same 4-face layout as calib/equirect_test.yml.
+faces:       ['front', 'right', 'back', 'left']
+
+face_size:   512
+fov:         90
+
+baseline:    [0, 0, 0, 0, 0, 0, 1]
+
+timescale:   1
